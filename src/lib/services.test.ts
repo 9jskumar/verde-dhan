@@ -174,31 +174,31 @@ describe("provider HTTP policy", () => {
 describe("WhatsApp", () => {
   it("validates and sanitises template messages", () => {
     expect(sanitizeTemplateParam("a\nb\t c      d")).toBe("a · b · c   d");
-    expect(validateTemplateMessage({ to: "918511728918", template: "vd_daily_close", languageCode: "en", bodyParams: ["x"] })).toContain("recipient is not a valid E.164 number");
-    expect(validateTemplateMessage({ to: "+918511728918", template: "vd_daily_close", languageCode: "en", bodyParams: ["x"] })).toEqual([]);
+    expect(validateTemplateMessage({ to: "919000000001", template: "vd_daily_close", languageCode: "en", bodyParams: ["x"] })).toContain("recipient is not a valid E.164 number");
+    expect(validateTemplateMessage({ to: "+919000000001", template: "vd_daily_close", languageCode: "en", bodyParams: ["x"] })).toEqual([]);
   });
 
   it("sends a template and redacts the recipient from the stored response", async () => {
     const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
       const body = JSON.parse(String(init!.body));
-      expect(body.to).toBe("918511728918");
+      expect(body.to).toBe("919000000001");
       expect(body.template.components[0].parameters[0].text).toBe("p1");
-      return new Response(JSON.stringify({ contacts: [{ wa_id: "918511728918" }], messages: [{ id: "wamid.1" }] }), { status: 200 });
+      return new Response(JSON.stringify({ contacts: [{ wa_id: "919000000001" }], messages: [{ id: "wamid.1" }] }), { status: 200 });
     });
     const r = await sendTemplate(
       { accessToken: "t", phoneNumberId: "123", apiVersion: "v23.0", fetchImpl: fetchImpl as unknown as typeof fetch },
-      { to: "+918511728918", template: "vd_daily_close", languageCode: "en", bodyParams: ["p1"] },
+      { to: "+919000000001", template: "vd_daily_close", languageCode: "en", bodyParams: ["p1"] },
     );
     expect(r.ok).toBe(true);
     expect(r.messageId).toBe("wamid.1");
-    expect(JSON.stringify(r.response)).not.toContain("8511728918");
-    expect(redactPhones({ n: "+918511728918" }).n).toBe("+91***18");
-    expect(recipientHash("+918511728918")).toHaveLength(32);
+    expect(JSON.stringify(r.response)).not.toContain("9000000001");
+    expect(redactPhones({ n: "+919000000001" }).n).toBe("+91***01");
+    expect(recipientHash("+919000000001")).toHaveLength(32);
   });
 
   it("marks rate-limit and 5xx errors retryable", async () => {
     const f = vi.fn(async () => new Response(JSON.stringify({ error: { code: 130429 } }), { status: 400 }));
-    const r = await sendTemplate({ accessToken: "t", phoneNumberId: "1", apiVersion: "v23.0", fetchImpl: f as unknown as typeof fetch }, { to: "+918511728918", template: "vd_test", languageCode: "en", bodyParams: [] });
+    const r = await sendTemplate({ accessToken: "t", phoneNumberId: "1", apiVersion: "v23.0", fetchImpl: f as unknown as typeof fetch }, { to: "+919000000001", template: "vd_test", languageCode: "en", bodyParams: [] });
     expect(r.ok).toBe(false);
     expect(r.retryable).toBe(true);
   });
