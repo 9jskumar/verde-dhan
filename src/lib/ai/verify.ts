@@ -113,3 +113,18 @@ export function verifyStockRecommendation(ai: StockRecommendation, analysis: Sto
 
   return { accepted: issues.length === 0, issues };
 }
+
+/** Same numeric and wording checks for free-form assistant answers. */
+export function verifyAssistantAnswer(answer: { answer: string; evidenceIds: string[] }, evidence: EvidencePack): VerificationResult {
+  const issues: string[] = [];
+  const ids = new Set(evidence.items.map((i) => i.id));
+  for (const id of answer.evidenceIds) if (!ids.has(id)) issues.push(`cites unknown evidence id "${id}"`);
+  const known = evidence.items.flatMap((i) => (typeof i.value === "number" ? [i.value] : typeof i.value === "string" ? extractNumbers(i.value) : []));
+  for (const n of extractNumbers(answer.answer)) {
+    if (ALLOWED_FREE_NUMBERS.has(Math.abs(n))) continue;
+    if (!known.some((k) => close(n, k, 0.01, 0.051) || close(n, k * 100, 0.01, 0.051))) issues.push(`number ${n} in text is not in the evidence`);
+  }
+  const lower = answer.answer.toLowerCase();
+  for (const p of BANNED_PHRASES) if (lower.includes(p)) issues.push(`uses certainty language: "${p}"`);
+  return { accepted: issues.length === 0, issues };
+}

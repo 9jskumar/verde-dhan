@@ -60,7 +60,7 @@ export function globalPremarketParams(date: Date, m: MarketInputs, research: Res
 
 export function indiaPremarketParams(date: Date, research: ResearchSnapshot): string[] {
   const watch = research.analyses.filter((a) => a.breakout.stage === "EARLY" && a.recommendation !== "AVOID").slice(0, 5);
-  const retests = research.analyses.filter((a) => a.breakout.stage === "RETEST" && a.recommendation !== "AVOID").slice(0, 3);
+  const retests = research.analyses.filter((a) => a.recommendation === "BUY_ON_RETEST").slice(0, 3);
   const risks = research.analyses.filter((a) => a.score.rejections.length).slice(0, 3).map((a) => `${a.symbol}: ${a.score.rejections.join("/").toLowerCase().replace(/_/g, " ")}`);
   return [
     `${demoTag(research.mode === "demo")}${formatIstDate(date)}`,

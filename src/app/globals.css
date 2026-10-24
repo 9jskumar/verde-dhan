@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/*
+ * Verde Dhan design tokens. A research terminal, not a trading toy:
+ * ink-green surfaces, a tempered antique-gold accent carried over from the
+ * Dhana mobile app, and muted gain/loss colours. Numbers use a monospace
+ * face with tabular figures so columns align.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #f6f7f4;
+  --panel: #ffffff;
+  --panel-2: #eef1ec;
+  --line: #dde2db;
+  --text: #13201a;
+  --text-2: #4c5b53;
+  --text-3: #7a877f;
+  --accent: #9a7a16;
+  --accent-soft: #f3ead0;
+  --brand: #1f5c43;
+  --gain: #1e7a4c;
+  --gain-soft: #e1f2e8;
+  --loss: #b4413f;
+  --loss-soft: #f8e4e3;
+  --warn: #9a6a0b;
+  --warn-soft: #fbf0d6;
+  --info: #2c5d8a;
+  --info-soft: #e2ecf6;
+  --demo: #7a3fa0;
+  --demo-soft: #f1e6f8;
+  --chart-1: #1f5c43;
+  --chart-2: #9a7a16;
+}
+
+.dark {
+  --bg: #0b110e;
+  --panel: #111a15;
+  --panel-2: #17221c;
+  --line: #24332b;
+  --text: #e8eee9;
+  --text-2: #9fb0a6;
+  --text-3: #6b7d72;
+  --accent: #d1ad3c;
+  --accent-soft: #2e2711;
+  --brand: #4fb386;
+  --gain: #4cc38a;
+  --gain-soft: #12291d;
+  --loss: #e07a77;
+  --loss-soft: #2d1716;
+  --warn: #e0b04f;
+  --warn-soft: #2d2410;
+  --info: #7fb0e0;
+  --info-soft: #132233;
+  --demo: #c79be6;
+  --demo-soft: #2a1a36;
+  --chart-1: #4fb386;
+  --chart-2: #d1ad3c;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-brand: var(--brand);
+  --color-gain: var(--gain);
+  --color-gain-soft: var(--gain-soft);
+  --color-loss: var(--loss);
+  --color-loss-soft: var(--loss-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-demo: var(--demo);
+  --color-demo-soft: var(--demo-soft);
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
