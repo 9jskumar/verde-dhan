@@ -103,9 +103,21 @@ export class HttpClient {
   }
 
   async getJson<T = unknown>(url: string, headers: Record<string, string> = {}): Promise<T> {
-    const { provider, cacheTtlMs, now } = this.opts;
+    const { cacheTtlMs, now } = this.opts;
     const cached = this.cache.get(url);
     if (cached && cacheTtlMs > 0 && now() - cached.at < cacheTtlMs) return cached.value as T;
+    const value = await this.request<T>(url, { headers });
+    if (cacheTtlMs > 0) this.cache.set(url, { at: now(), value });
+    return value;
+  }
+
+  /** POST with a JSON body. Never cached. */
+  async postJson<T = unknown>(url: string, body: unknown, headers: Record<string, string> = {}): Promise<T> {
+    return this.request<T>(url, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body) });
+  }
+
+  private async request<T>(url: string, init: { method?: string; headers: Record<string, string>; body?: string }): Promise<T> {
+    const { provider } = this.opts;
     if (!this.breaker.canRequest()) throw new ProviderError(provider, "circuit open; skipping request", undefined, true);
 
     let attempt = 0;
@@ -118,9 +130,8 @@ export class HttpClient {
         }
       }
       try {
-        const value = await this.once<T>(url, headers);
+        const value = await this.once<T>(url, init);
         this.breaker.success();
-        if (cacheTtlMs > 0) this.cache.set(url, { at: now(), value });
         return value;
       } catch (err) {
         const retryable = err instanceof ProviderError ? err.retryable : true;
@@ -135,12 +146,12 @@ export class HttpClient {
     }
   }
 
-  private async once<T>(url: string, headers: Record<string, string>): Promise<T> {
+  private async once<T>(url: string, init: { method?: string; headers: Record<string, string>; body?: string }): Promise<T> {
     const { provider, timeoutMs, fetchImpl } = this.opts;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetchImpl(url, { headers: { Accept: "application/json", ...headers }, signal: controller.signal, cache: "no-store" });
+      const res = await fetchImpl(url, { method: init.method ?? "GET", headers: { Accept: "application/json", ...init.headers }, body: init.body, signal: controller.signal, cache: "no-store" });
       if (!res.ok) {
         const retryable = res.status === 429 || res.status >= 500;
         // Never echo request URLs (they may carry API keys) into errors.

@@ -13,11 +13,12 @@ A research platform for Indian equities (NSE/BSE) with global indices, forex and
 | Web app: all 21 sections, stock detail, login | Built; production build passes; smoke-tested in demo mode |
 | Claude research and assistant (with numeric verification) | Built; **pending `ANTHROPIC_API_KEY`** |
 | WhatsApp reports and delivery webhooks | Built; **pending Meta credentials, approved templates and recipient opt-in** |
-| Indian market data (Upstox adapter) | Built; **pending `UPSTOX_ACCESS_TOKEN` and live testing** |
-| Global data (Twelve Data adapter) | Built; **pending `TWELVEDATA_API_KEY` and live testing** |
-| Energy and base-metal futures feed | **Pending licence; no adapter yet** |
+| Angel One (stocks, NIFTY 50 / SENSEX, MCX commodities, currency futures) | Built and unit-tested; **pending the `ANGELONE_*` values and live testing** |
+| TradingView charts on Global, Forex, Commodities | Built (display only; not used in scores or reports) |
+| Global index numbers for scoring and the 08:00 report | **Pending a data API** (TradingView has none) |
+| Brent crude | **Pending** (no MCX contract) |
 | News (RSS) | Built; **pending a list of licensed feeds** |
-| Supabase project | **Pending creation**; migrations ready to apply |
+| Supabase project | Created (Mumbai); all migrations applied |
 | Deployment to MilesWeb | **Not yet deployed**; guide written |
 
 Nothing marked pending has been tested against the real service.

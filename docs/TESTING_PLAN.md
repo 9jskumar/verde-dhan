@@ -28,8 +28,8 @@ RLS isolation between two users for every owner table; anon has no access; authe
 
 | Area | Test to run once available |
 |---|---|
-| Upstox | Fetch NIFTY 50 and two stocks' daily candles; compare a week of closes with the broker terminal |
-| Twelve Data | Fetch every mapped symbol; confirm timestamps and delay |
+| Angel One | Log in; fetch NIFTY 50, SENSEX and two stocks' daily candles and compare a week of closes with the Angel One app; check the MCX gold/crude and USDINR front-month contracts match the app |
+| TradingView | Open Global, Forex and Commodities; confirm every widget symbol loads (no "invalid symbol") in light and dark themes |
 | Supabase live | Apply migrations to the real project; sign in; create watchlist and portfolio; check RLS with two accounts |
 | Jobs | Run each job once with `npm run job -- <name>`; check `job_runs`; re-run to confirm idempotency |
 | Claude | Generate narratives for the Top 3; confirm verification accepts good output and logs rejections |

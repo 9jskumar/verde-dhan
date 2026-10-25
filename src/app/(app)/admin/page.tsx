@@ -7,7 +7,7 @@ import { supabaseForUser } from "@/lib/supabase/server";
 
 const LABEL: Record<string, string> = {
   supabase: "Supabase (anon)", supabaseService: "Supabase service role (jobs)", claude: "Anthropic Claude", whatsapp: "WhatsApp Cloud API", whatsappOptIn: "WhatsApp recipient opt-in",
-  whatsappWebhook: "WhatsApp webhook", indiaMarketData: "Indian market data (Upstox)", globalMarketData: "Global data (Twelve Data)", news: "News feeds", cron: "Cron secret", demoMode: "Demo mode",
+  whatsappWebhook: "WhatsApp webhook", indiaMarketData: "Angel One (stocks, indices, MCX, currency futures)", globalCharts: "TradingView charts (display only)", globalMarketData: "Global index data API", news: "News feeds", cron: "Cron secret", demoMode: "Demo mode",
 };
 
 export default async function AdminPage() {

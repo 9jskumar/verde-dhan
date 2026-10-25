@@ -5,6 +5,7 @@ import { globalEvidence } from "../ai/evidence";
 import { loadLatestResearch, loadMarketSnapshot } from "../data/live-research";
 import { env, integrationStatus } from "../env";
 import { contentFingerprint, canonicalUrl } from "../providers/news";
+import { fetchScripMasterRows, scripMasterTokens } from "../providers/angelone";
 import { resolveProviders } from "../providers/registry";
 import { COMMODITY_KEYS, FX_PAIRS, GLOBAL_INDEX_KEYS, INDIA_INDEX_KEYS } from "../providers/types";
 import { checkBars } from "../providers/validate";
@@ -77,7 +78,7 @@ const ingestGlobalMarkets: JobHandler = async ({ db }) => {
   if (p.commodities) {
     const c = await p.commodities.getCommodityQuotes(COMMODITY_KEYS);
     const { error } = await db.from("commodity_prices").upsert(
-      c.map((q) => ({ instrument: q.instrument, timestamp: q.timestamp, price: q.price, currency: q.currency, unit: q.unit, contract_type: q.contractType, previous_close: q.previousClose, percentage_change: q.percentageChange, source: q.source, data_delay_seconds: q.dataDelaySeconds })),
+      c.map((q) => ({ instrument: q.instrument, timestamp: q.timestamp, price: q.price, currency: q.currency, unit: q.unit, contract_type: q.contractType, contract_month: q.contractMonth ?? null, previous_close: q.previousClose, percentage_change: q.percentageChange, source: q.source, data_delay_seconds: q.dataDelaySeconds })),
       { onConflict: "instrument,timestamp,source,contract_type", ignoreDuplicates: true },
     );
     if (error) throw new Error(`commodity_prices insert: ${error.message}`);
@@ -105,9 +106,24 @@ async function activeStocks(db: SupabaseClient): Promise<StockRow[]> {
 
 const ingestIndiaPrices: JobHandler = async ({ db, now, log }) => {
   const stocks = await activeStocks(db);
-  const keyMap = new Map(stocks.map((s) => [`${s.exchange}:${s.symbol}`, s.provider_ids.upstox ?? null]));
-  const p = resolveProviders(env(), { resolveInstrumentKey: async (symbol, exchange) => keyMap.get(`${exchange}:${symbol}`) ?? null });
+  const keyMap = new Map(stocks.map((s) => [`${s.exchange}:${s.symbol}`, s.provider_ids.angelone ?? null]));
+  const p = resolveProviders(env(), { resolveToken: async (symbol, exchange) => keyMap.get(`${exchange}:${symbol}`) ?? null });
   if (!p.india) return { skipped: "no Indian market data provider configured" };
+  // Map any stock without a SmartAPI token from the published scrip master, once, and store it.
+  const unmapped = stocks.filter((s) => !s.provider_ids.angelone);
+  if (unmapped.length) {
+    const tokens = scripMasterTokens(await fetchScripMasterRows());
+    for (const s of unmapped) {
+      const token = tokens.get(`${s.exchange}:${s.symbol}`);
+      if (!token) {
+        await qualityIssue(db, "UNMAPPED_INSTRUMENT", "WARNING", "stock", s.id, { symbol: s.symbol, exchange: s.exchange, provider: "angelone" });
+        continue;
+      }
+      keyMap.set(`${s.exchange}:${s.symbol}`, token);
+      const { error } = await db.from("stocks").update({ provider_ids: { ...s.provider_ids, angelone: token } }).eq("id", s.id);
+      if (error) log(`could not store SmartAPI token for ${s.exchange}:${s.symbol}`, { error: error.message });
+    }
+  }
   const to = localDate(now);
   const from = localDate(new Date(now.getTime() - HISTORY_DAYS * 86_400_000));
   let written = 0;

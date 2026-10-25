@@ -30,9 +30,9 @@ Holidays come from `market_holidays`. **Load each year's NSE holiday list into t
 
 | Credential | Lifetime | Action |
 |---|---|---|
-| Upstox access token | until ~03:30 IST next day | Regenerate daily via Upstox login flow and update `UPSTOX_ACCESS_TOKEN`; an automated refresh is on the roadmap |
+| Angel One session | refreshed automatically | The app logs in with the PIN and a TOTP code; nothing to do daily. If you change your PIN or reset TOTP, update `ANGELONE_PIN` / `ANGELONE_TOTP_SECRET`. |
 | WhatsApp system-user token | permanent unless revoked | Rotate if leaked |
-| Anthropic, Twelve Data keys | until revoked | Rotate yearly or if leaked |
+| Anthropic key, Angel One app key | until revoked | Rotate yearly or if leaked |
 
 After changing an environment variable, restart the web process and the worker (`pm2 restart verde-web verde-worker`).
 

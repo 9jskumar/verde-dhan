@@ -4,7 +4,7 @@ All functions are pure and live in `src/lib/quant/`. Versions are stored with ev
 
 ## Candles
 
-- Only **completed** daily candles are used. Upstox daily candles count as complete after 16:00 IST. A close above resistance on the forming candle sets `intradayCrossPending` but never confirms a breakout.
+- Only **completed** daily candles are used. Angel One daily candles count as complete after 16:00 IST. A close above resistance on the forming candle sets `intradayCrossPending` but never confirms a breakout.
 - Bars are validated before storage: high ≥ max(open, close), low ≤ min(open, close), positive prices, no duplicate timestamps, staleness flagged.
 
 ## Indicators (verified against TA-Lib 0.8.2 in `tests/fixtures/talib_reference.json`)

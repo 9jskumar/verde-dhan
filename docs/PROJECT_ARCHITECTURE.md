@@ -31,7 +31,7 @@ src/
   components/            UI primitives, charts, research and market widgets, forms
   lib/quant/             pure functions: indicators, levels, breakout, fundamentals, scoring, risk, globalImpact, performance
   lib/analysis/          pipeline: bars + statements → StockAnalysis
-  lib/providers/         adapters (Upstox, Twelve Data, RSS, Demo), HTTP policy (rate limit, retry, circuit breaker), validation
+  lib/providers/         adapters (Angel One, Twelve Data (dormant), RSS, Demo), HTTP policy (rate limit, retry, circuit breaker), validation
   lib/ai/                evidence packs, prompts, Claude calls, verification
   lib/whatsapp/          Cloud API client, report builders, webhook verification
   lib/jobs/              job definitions, idempotent runner, task handlers, IST calendar

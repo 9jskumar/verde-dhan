@@ -82,6 +82,8 @@ export interface CommodityQuote extends Provenance {
   unit: string;
   /** Spot and futures are never conflated. */
   contractType: "SPOT" | "FRONT_MONTH_FUTURE" | "CONTINUOUS_FUTURE";
+  /** Expiry date (YYYY-MM-DD) of the contract quoted; required for FRONT_MONTH_FUTURE. */
+  contractMonth?: string | null;
   previousClose: number | null;
   percentageChange: number | null;
 }

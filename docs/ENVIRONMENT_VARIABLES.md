@@ -24,11 +24,14 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe to 
 | `WHATSAPP_RECIPIENT_OPTED_IN` | WhatsApp | `true` only after the recipient's opt-in is recorded. Nothing is enqueued otherwise. |
 | `WHATSAPP_APP_SECRET` | delivery webhook | Verifies `X-Hub-Signature-256` |
 | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | delivery webhook | Random string, also entered in Meta's webhook settings |
-| `INDIA_MARKET_PROVIDER` | Indian prices | `upstox` or `none` |
-| `UPSTOX_ACCESS_TOKEN` | Indian prices | Expires daily (see OPERATIONS_MANUAL.md) |
-| `GLOBAL_MARKET_PROVIDER` | global, FX, gold/silver | `twelvedata` or `none` |
-| `TWELVEDATA_API_KEY` | | |
-| `TWELVEDATA_SYMBOL_MAP` | global indices | JSON map from internal key to vendor symbol |
+| `INDIA_MARKET_PROVIDER` | Indian prices, MCX, currency futures | `angelone` or `none` |
+| `ANGELONE_API_KEY` | Angel One | App key from the SmartAPI developer portal |
+| `ANGELONE_CLIENT_CODE` | Angel One | Angel One client ID |
+| `ANGELONE_PIN` | Angel One | Login PIN (MPIN). Secret. |
+| `ANGELONE_TOTP_SECRET` | Angel One | TOTP setup key from smartapi.angelone.in/enable-totp. Secret: anyone with it and the PIN can log in. |
+| `GLOBAL_MARKET_PROVIDER` | Global, Forex, Commodities pages | `tradingview` (default; browser widgets, display only) or `none` |
+| `GLOBAL_DATA_PROVIDER` | global index numbers | `twelvedata` or `none` (default). Not in use. |
+| `TWELVEDATA_API_KEY`, `TWELVEDATA_SYMBOL_MAP` | | Only with `GLOBAL_DATA_PROVIDER=twelvedata` |
 | `NEWS_RSS_FEEDS` | news | Comma-separated RSS URLs you are licensed to use |
 | `CRON_SECRET` | `/api/cron/*` | Long random string; sent as `Authorization: Bearer …` |
 | `NOTIFICATION_TIMEZONE` | | Default `Asia/Kolkata` |

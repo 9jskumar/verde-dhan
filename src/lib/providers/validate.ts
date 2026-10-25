@@ -81,3 +81,15 @@ export function dedupeBars<T extends { timestamp: string }>(bars: readonly T[]):
   for (const b of bars) byTs.set(b.timestamp, b);
   return [...byTs.values()].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 }
+
+/**
+ * A daily NSE/BSE candle is final once the session has closed. The
+ * exchanges close at 15:30 IST; we wait until 16:00 IST to allow for
+ * closing-auction prints.
+ */
+export function isDailyCandleComplete(candleDate: string, now = new Date()): boolean {
+  const ist = new Date(now.getTime() + 5.5 * 3600_000);
+  const today = ist.toISOString().slice(0, 10);
+  const day = candleDate.slice(0, 10);
+  return day < today || (day === today && ist.getUTCHours() >= 16);
+}

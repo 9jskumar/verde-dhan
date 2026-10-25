@@ -58,6 +58,8 @@ Views use `security_invoker = true`, so they respect the caller's RLS. Materiali
 
 **0700 hardening** fixes the Supabase security advisor findings: fixed `search_path` on trigger functions, and no API execute rights for anonymous users on the security-definer helpers. Remaining advisor notes are intentional: price partitions have RLS with no policies (access goes through the parent table), and the two materialized views are readable by signed-in users only.
 
+**0800 data sources** registers `angelone` (enabled) and `twelvedata` (disabled) in `data_sources`. Price tables reference `data_sources(id)`, so a provider's rows are refused until it is listed.
+
 ## Applying
 
 ```bash

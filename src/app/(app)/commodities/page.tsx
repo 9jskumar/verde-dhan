@@ -1,4 +1,5 @@
 import { MarketPage } from "@/components/market-page";
+import { TradingViewQuotes, TV_COMMODITIES } from "@/components/tradingview";
 import { dataMode, getMarket } from "@/lib/data/repository";
 import { integrationStatus } from "@/lib/env";
 
@@ -9,13 +10,14 @@ export default async function CommoditiesPage() {
   return (
     <MarketPage
       title="Commodities"
-      description="Energy, precious and base metals. Spot and futures prices are labelled and never mixed."
+      description="Energy, precious and base metals. Stored values are MCX front-month futures in rupees from Angel One. Spot and futures are labelled and never mixed."
       kind="commodity"
       quotes={market.commodities.map((q) => ({ key: q.instrument, name: q.instrument, value: q.price, changePct: q.percentageChange, timestamp: q.timestamp, source: q.source, isDemo: q.isDemo, delaySeconds: q.dataDelaySeconds, unit: `${q.currency}/${q.unit}`, note: CONTRACT[q.contractType] }))}
-      pending={dataMode() !== "demo" && !integrationStatus().globalMarketData ? { feature: "Commodity data", needs: ["GLOBAL_MARKET_PROVIDER=twelvedata", "TWELVEDATA_API_KEY (gold and silver)", "a licensed energy and base-metals feed (pending)"] } : null}
+      widget={integrationStatus().globalCharts ? <TradingViewQuotes title="Commodities" symbols={TV_COMMODITIES} /> : undefined}
+      pending={dataMode() !== "demo" && !integrationStatus().indiaMarketData && !integrationStatus().globalMarketData ? { feature: "Commodity numbers for scoring and reports", needs: ["INDIA_MARKET_PROVIDER=angelone", "ANGELONE_API_KEY", "ANGELONE_CLIENT_CODE", "ANGELONE_PIN", "ANGELONE_TOTP_SECRET"] } : null}
       chartKey="XAU"
       chartTitle="Gold"
-      notes={["Brent, WTI, natural gas and base metals need a futures data licence; until one is configured they show as unavailable rather than being estimated."]}
+      notes={["MCX prices include the rupee exchange rate, so their daily change can differ from international prices.", "Brent has no actively traded MCX contract, so the Brent-based impact rules stay unavailable rather than using WTI in its place."]}
     />
   );
 }

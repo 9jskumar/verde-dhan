@@ -37,10 +37,21 @@ const schema = z.object({
   WHATSAPP_APP_SECRET: optional,
   WHATSAPP_WEBHOOK_VERIFY_TOKEN: optional,
 
-  INDIA_MARKET_PROVIDER: z.enum(["upstox", "none"]).default("none"),
-  UPSTOX_ACCESS_TOKEN: optional,
+  INDIA_MARKET_PROVIDER: z.enum(["angelone", "none"]).default("none"),
+  /** Angel One SmartAPI: app key, client code, login PIN and the TOTP setup key. */
+  ANGELONE_API_KEY: optional,
+  ANGELONE_CLIENT_CODE: optional,
+  ANGELONE_PIN: optional,
+  ANGELONE_TOTP_SECRET: optional,
 
-  GLOBAL_MARKET_PROVIDER: z.enum(["twelvedata", "none"]).default("none"),
+  /**
+   * What the Global, Forex and Commodities pages display. "tradingview"
+   * embeds TradingView widgets, which render in the browser only and never
+   * feed the scores, AI evidence or WhatsApp reports.
+   */
+  GLOBAL_MARKET_PROVIDER: z.enum(["tradingview", "none"]).default("tradingview"),
+  /** Server-side source of global numbers for scoring and reports. */
+  GLOBAL_DATA_PROVIDER: z.enum(["twelvedata", "none"]).default("none"),
   TWELVEDATA_API_KEY: optional,
   /** JSON object overriding internal key → vendor symbol, e.g. {"SPX":"SPX"} */
   TWELVEDATA_SYMBOL_MAP: optional,
@@ -78,6 +89,10 @@ export function isDemoMode(e: Env = env()): boolean {
   return true;
 }
 
+export function angelOneConfigured(e: Env = env()): boolean {
+  return e.INDIA_MARKET_PROVIDER === "angelone" && Boolean(e.ANGELONE_API_KEY && e.ANGELONE_CLIENT_CODE && e.ANGELONE_PIN && e.ANGELONE_TOTP_SECRET);
+}
+
 export const integrationStatus = (e: Env = env()) => ({
   supabase: Boolean(e.NEXT_PUBLIC_SUPABASE_URL && e.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   supabaseService: Boolean(e.NEXT_PUBLIC_SUPABASE_URL && e.SUPABASE_SERVICE_ROLE_KEY),
@@ -85,8 +100,9 @@ export const integrationStatus = (e: Env = env()) => ({
   whatsapp: Boolean(e.WHATSAPP_ACCESS_TOKEN && e.WHATSAPP_PHONE_NUMBER_ID && e.WHATSAPP_RECIPIENT),
   whatsappOptIn: e.WHATSAPP_RECIPIENT_OPTED_IN === "true",
   whatsappWebhook: Boolean(e.WHATSAPP_APP_SECRET && e.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
-  indiaMarketData: e.INDIA_MARKET_PROVIDER === "upstox" && Boolean(e.UPSTOX_ACCESS_TOKEN),
-  globalMarketData: e.GLOBAL_MARKET_PROVIDER === "twelvedata" && Boolean(e.TWELVEDATA_API_KEY),
+  indiaMarketData: angelOneConfigured(e),
+  globalCharts: e.GLOBAL_MARKET_PROVIDER === "tradingview",
+  globalMarketData: e.GLOBAL_DATA_PROVIDER === "twelvedata" && Boolean(e.TWELVEDATA_API_KEY),
   news: Boolean(e.NEWS_RSS_FEEDS),
   cron: Boolean(e.CRON_SECRET),
   demoMode: isDemoMode(e),

@@ -17,10 +17,10 @@ Status as of 2026-10-24. "Built" means implemented with tests where testable off
 ## Phase 3 — Data providers 🟡
 - [x] HTTP policy: rate limit, retry, circuit breaker, timeouts, redaction; validation and dedupe
 - [x] Demo provider (fictional universe, clearly labelled)
-- [ ] Upstox adapter — **built, pending `UPSTOX_ACCESS_TOKEN` and live verification**
-- [ ] Upstox daily token refresh automation — **not built**
-- [ ] Twelve Data adapter — **built, pending `TWELVEDATA_API_KEY` and live verification**
-- [ ] Energy and base-metal futures — **pending licence; no adapter**
+- [ ] Angel One SmartAPI adapter (stocks, NIFTY 50 / SENSEX, MCX, currency futures) with automatic daily login — **built and unit-tested, pending the four `ANGELONE_*` values and live verification**
+- [x] TradingView widgets on Global, Forex and Commodities pages (display only)
+- [ ] Global index numbers for scoring and the 08:00 report — **pending a data API (TradingView has none)**
+- [ ] Brent — **pending; no MCX contract**
 - [ ] Fundamentals and corporate announcements vendor — **pending vendor choice; interface only**
 - [ ] RSS news — **built, pending licensed feed list**
 
