@@ -30,16 +30,19 @@ describe("Angel One helpers", () => {
 
   it("picks the nearest unexpired future on the exact underlying", () => {
     const rows = [
-      { token: "1", symbol: "GOLD05OCT26FUT", name: "GOLD", expiry: "05OCT2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
-      { token: "2", symbol: "GOLD05DEC26FUT", name: "GOLD", expiry: "05DEC2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
-      { token: "3", symbol: "GOLD05FEB27FUT", name: "GOLD", expiry: "05FEB2027", exch_seg: "MCX", instrumenttype: "FUTCOM" },
-      { token: "4", symbol: "GOLDM03NOV26FUT", name: "GOLDM", expiry: "03NOV2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
+      { token: "1", symbol: "COPPER30SEP26FUT", name: "COPPER", expiry: "30SEP2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
+      { token: "2", symbol: "COPPER28NOV26FUT", name: "COPPER", expiry: "28NOV2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
+      { token: "3", symbol: "COPPER31DEC26FUT", name: "COPPER", expiry: "31DEC2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
+      { token: "4", symbol: "COPPERM31OCT26FUT", name: "COPPERM", expiry: "31OCT2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
+      { token: "9", symbol: "GOLD05DEC26FUT", name: "GOLD", expiry: "05DEC2026", exch_seg: "MCX", instrumenttype: "FUTCOM" },
       { token: "5", symbol: "USDINR26NOV26FUT", name: "USDINR", expiry: "26NOV2026", exch_seg: "CDS", instrumenttype: "FUTCUR" },
       { token: "6", symbol: "USDINR26NOV2683CE", name: "USDINR", expiry: "26NOV2026", exch_seg: "CDS", instrumenttype: "OPTCUR" },
     ];
     const m = frontMonthContracts(rows, "2026-10-25");
-    expect(m.get("XAU")?.token).toBe("2");
-    expect(m.get("XAU")?.expiry).toBe("2026-12-05");
+    expect(m.get("COPPER")?.token).toBe("2");
+    expect(m.get("COPPER")?.expiry).toBe("2026-11-28");
+    // Gold comes from CFI, not MCX.
+    expect(m.has("XAU")).toBe(false);
     expect(m.get("USDINR")?.token).toBe("5");
     expect(m.has("BRENT")).toBe(false);
   });
@@ -68,7 +71,7 @@ function provider(fetchImpl: typeof fetch) {
     loadContracts: async () =>
       new Map([
         ["JPYINR", { exchange: "CDS" as const, token: "77", tradingSymbol: "JPYINR26NOV26FUT", expiry: "2026-11-26" }],
-        ["XAU", { exchange: "MCX" as const, token: "88", tradingSymbol: "GOLD05DEC26FUT", expiry: "2026-12-05" }],
+        ["COPPER", { exchange: "MCX" as const, token: "88", tradingSymbol: "COPPER28NOV26FUT", expiry: "2026-11-28" }],
       ]),
     now: () => NOW,
     http: { sleep: async () => {}, fetchImpl, maxRetries: 0 },
@@ -125,17 +128,18 @@ describe("Angel One provider", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("labels MCX prices as INR front-month futures and converts JPY/INR to per-yen", async () => {
+  it("labels MCX base metals as INR front-month futures and converts JPY/INR to per-yen", async () => {
     const { impl } = fakeFetch((url, body) => {
       if (url.includes("loginByPassword")) return { status: true, data: { jwtToken: "j" } };
       const ex = body.exchangeTokens as Record<string, string[]>;
       if (ex.CDS) return { status: true, data: { fetched: [{ exchange: "CDS", symbolToken: "77", ltp: 55.5, close: 55, percentChange: 0.9091 }] } };
-      return { status: true, data: { fetched: [{ exchange: "MCX", symbolToken: "88", ltp: 120000, close: 119000, percentChange: 0.8403 }] } };
+      return { status: true, data: { fetched: [{ exchange: "MCX", symbolToken: "88", ltp: 1200, close: 1190, percentChange: 0.8403 }] } };
     });
     const p = provider(impl);
-    const [gold] = await p.getCommodityQuotes(["XAU", "BRENT"]);
-    expect(gold).toMatchObject({ instrument: "XAU", price: 120000, currency: "INR", unit: "10 g", contractType: "FRONT_MONTH_FUTURE", contractMonth: "2026-12-05" });
-    expect(await p.getCommodityQuotes(["BRENT"])).toEqual([]);
+    const [copper] = await p.getCommodityQuotes(["COPPER", "BRENT"]);
+    expect(copper).toMatchObject({ instrument: "COPPER", price: 1200, currency: "INR", unit: "kg", contractType: "FRONT_MONTH_FUTURE", contractMonth: "2026-11-28" });
+    expect(await p.getCommodityQuotes(["BRENT", "XAU", "WTI"])).toEqual([]);
+    expect(await p.getFxQuotes(["EURUSD"])).toEqual([]);
     const [jpy] = await p.getFxQuotes(["JPYINR"]);
     expect(jpy!.mid).toBeCloseTo(0.555, 6);
     expect(jpy!.previousClose).toBeCloseTo(0.55, 6);

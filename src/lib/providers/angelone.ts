@@ -58,11 +58,9 @@ export const ANGELONE_INDEX_TOKENS: Record<string, { exchange: "NSE" | "BSE"; to
 const SESSION_TTL_MS = 6 * 3600_000;
 
 /** Internal commodity key → MCX underlying name and quoting terms. */
+// Crude, natural gas, gold and silver come from CFI Financial in USD
+// (bridge/cfi_mt5), so only the base metals CFI lacks are read from MCX.
 export const MCX_COMMODITIES: Record<string, { name: string; unit: string }> = {
-  WTI: { name: "CRUDEOIL", unit: "barrel" },
-  XAU: { name: "GOLD", unit: "10 g" },
-  XAG: { name: "SILVER", unit: "kg" },
-  NATGAS: { name: "NATURALGAS", unit: "mmBtu" },
   COPPER: { name: "COPPER", unit: "kg" },
   ALUMINIUM: { name: "ALUMINIUM", unit: "kg" },
   ZINC: { name: "ZINC", unit: "kg" },
@@ -77,9 +75,6 @@ export const CDS_PAIRS: Record<string, { name: string; perUnits: number }> = {
   EURINR: { name: "EURINR", perUnits: 1 },
   GBPINR: { name: "GBPINR", perUnits: 1 },
   JPYINR: { name: "JPYINR", perUnits: 100 },
-  EURUSD: { name: "EURUSD", perUnits: 1 },
-  GBPUSD: { name: "GBPUSD", perUnits: 1 },
-  USDJPY: { name: "USDJPY", perUnits: 1 },
 };
 
 export interface FuturesContract {

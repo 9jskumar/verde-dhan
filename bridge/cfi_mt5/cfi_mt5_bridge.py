@@ -10,7 +10,8 @@ global impact engine, Claude evidence and WhatsApp reports pick them up.
 
 What it writes (source = "cfi"):
   - global_indices   for SPX, NDX, DJI, FTSE, DAX, N225
-  - commodity_prices for BRENT (and any other commodity key you map)
+  - commodity_prices for BRENT, WTI, NATGAS (CFDs on futures) and XAU, XAG (spot)
+  - forex_prices     for EURUSD, GBPUSD, USDJPY (spot)
 
 The prices are CFI's CFD quotes. They track the underlying index or
 futures market but are not the official index level or exchange
@@ -52,9 +53,16 @@ INSTRUMENTS: dict[str, tuple[str, str, str | None, str]] = {
     "N225": ("INDEX", "JPY", None, "JP"),
     "BRENT": ("COMMODITY", "USD", "bbl", "XX"),
     "WTI": ("COMMODITY", "USD", "bbl", "US"),
+    "NATGAS": ("COMMODITY", "USD", "MMBtu", "US"),
     "XAU": ("COMMODITY", "USD", "troy oz", "XX"),
     "XAG": ("COMMODITY", "USD", "troy oz", "XX"),
+    "EURUSD": ("FX", "USD", None, "XX"),
+    "GBPUSD": ("FX", "USD", None, "XX"),
+    "USDJPY": ("FX", "JPY", None, "XX"),
 }
+
+# Spot metals; every other commodity CFD tracks a rolling futures contract.
+SPOT = {"XAU", "XAG"}
 
 NAMES = {
     "SPX": "S&P 500", "NDX": "Nasdaq-100", "DJI": "Dow Jones", "FTSE": "FTSE 100",
@@ -74,6 +82,8 @@ class Reading:
     previous_close: float | None
     day_high: float | None
     day_low: float | None
+    bid: float | None = None
+    ask: float | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -141,9 +151,10 @@ def pct(last: float, prev: float | None) -> float | None:
     return None if not prev else round((last - prev) / prev * 100, 4)
 
 
-def build_rows(readings: list[Reading], now: datetime) -> tuple[list[dict], list[dict]]:
+def build_rows(readings: list[Reading], now: datetime) -> tuple[list[dict], list[dict], list[dict]]:
     indices: list[dict] = []
     commodities: list[dict] = []
+    forex: list[dict] = []
     for r in readings:
         asset, ccy, unit, country = INSTRUMENTS[r.key]
         if r.last <= 0:
@@ -159,15 +170,20 @@ def build_rows(readings: list[Reading], now: datetime) -> tuple[list[dict], list
                 "day_high": r.day_high, "day_low": r.day_low,
                 "market_status": market_status(r.timestamp, now),
             })
+        elif asset == "FX":
+            forex.append({
+                **base,
+                "pair": r.key, "bid": r.bid, "ask": r.ask, "mid": r.last,
+                "previous_close": r.previous_close, "percentage_change": pct(r.last, r.previous_close),
+            })
         else:
             commodities.append({
                 **base,
                 "instrument": r.key, "price": r.last, "currency": ccy, "unit": unit,
-                # A CFD on the rolling futures contract.
-                "contract_type": "CONTINUOUS_FUTURE", "contract_month": None,
+                "contract_type": "SPOT" if r.key in SPOT else "CONTINUOUS_FUTURE", "contract_month": None,
                 "previous_close": r.previous_close, "percentage_change": pct(r.last, r.previous_close),
             })
-    return indices, commodities
+    return indices, commodities, forex
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +236,8 @@ def to_readings(raw, offset_h: float) -> list[Reading]:
             previous_close=float(prev_bar["close"]) or None,
             day_high=float(today_bar["high"]) or None,
             day_low=float(today_bar["low"]) or None,
+            bid=float(tick.bid) or None,
+            ask=float(tick.ask) or None,
         ))
     return out
 
@@ -286,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     mt5 = connect()
     try:
         if args.list_symbols:
-            words = ("US", "500", "100", "30", "NAS", "DOW", "UK", "FTSE", "GER", "DE", "DAX", "JP", "JPN", "NIK", "225", "OIL", "BRENT", "WTI", "XAU", "XAG")
+            words = ("US", "500", "100", "30", "NAS", "DOW", "UK", "FTSE", "GER", "DE", "DAX", "JP", "JPN", "NIK", "225", "OIL", "BRENT", "WTI", "XAU", "XAG", "GAS", "NG", "EURUSD", "GBPUSD", "USDJPY")
             for s in mt5.symbols_get() or []:
                 if any(w in s.name.upper() for w in words):
                     print(f"{s.name:<16} {s.description}")
@@ -298,7 +316,7 @@ def main(argv: list[str] | None = None) -> int:
             offset = server_offset_hours([int(t.time) for _, _, t, _ in raw], time.time(), os.environ.get("CFI_SERVER_UTC_OFFSET"))
             readings = to_readings(raw, offset)
             now = datetime.now(timezone.utc)
-            indices, commodities = build_rows(readings, now)
+            indices, commodities, forex = build_rows(readings, now)
             for p in problems:
                 print(f"warning: {p}", file=sys.stderr)
             if args.dry_run:
@@ -308,8 +326,9 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 post("global_indices", indices, "symbol,timestamp,source")
                 post("commodity_prices", commodities, "instrument,timestamp,source,contract_type")
+                post("forex_prices", forex, "pair,timestamp,source")
                 provider_health(not problems, "; ".join(problems) or None)
-                print(f"stored {len(indices)} index and {len(commodities)} commodity readings from CFI")
+                print(f"stored {len(indices)} index, {len(commodities)} commodity and {len(forex)} forex readings from CFI")
             if not args.loop:
                 return 1 if problems and not readings else 0
             time.sleep(max(30, args.loop))

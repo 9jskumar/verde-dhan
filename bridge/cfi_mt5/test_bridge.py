@@ -22,7 +22,7 @@ class BridgeTests(unittest.TestCase):
             b.Reading("SPX", "US500", now - timedelta(minutes=1), 7633.0, 7600.0, 7650.0, 7590.0),
             b.Reading("BRENT", "BRENT", now - timedelta(hours=30), 111.94, 110.0, 112.5, 109.8),
         ]
-        idx, cmd = b.build_rows(readings, now)
+        idx, cmd, _fx = b.build_rows(readings, now)
         self.assertEqual(idx[0]["source"], "cfi")
         self.assertEqual(idx[0]["currency"], "USD")
         self.assertAlmostEqual(idx[0]["percentage_change"], 0.4342, places=4)
@@ -33,10 +33,20 @@ class BridgeTests(unittest.TestCase):
 
     def test_closed_market_and_missing_previous_close(self):
         now = datetime(2026, 10, 25, 12, 0, tzinfo=timezone.utc)
-        idx, _ = b.build_rows([b.Reading("N225", "JPN225", now - timedelta(days=1), 62518.0, None, None, None)], now)
+        idx, _, _ = b.build_rows([b.Reading("N225", "JPN225", now - timedelta(days=1), 62518.0, None, None, None)], now)
         self.assertEqual(idx[0]["market_status"], "CLOSED")
         self.assertIsNone(idx[0]["percentage_change"])
         self.assertIsNone(idx[0]["absolute_change"])
+
+    def test_spot_metals_and_fx(self):
+        now = datetime(2026, 10, 26, 2, 0, tzinfo=timezone.utc)
+        _, cmd, fx = b.build_rows([
+            b.Reading("XAU", "XAUUSD", now, 2650.0, 2640.0, 2655.0, 2630.0),
+            b.Reading("USDJPY", "USDJPY", now, 152.3, 152.0, 152.5, 151.8, bid=152.29, ask=152.31),
+        ], now)
+        self.assertEqual(cmd[0]["contract_type"], "SPOT")
+        self.assertEqual(fx[0]["pair"], "USDJPY")
+        self.assertEqual((fx[0]["bid"], fx[0]["ask"], fx[0]["mid"]), (152.29, 152.31, 152.3))
 
     def test_symbol_map_rejects_unknown_keys_and_requires_config(self):
         os.environ.pop("CFI_SYMBOL_MAP", None)
