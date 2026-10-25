@@ -15,8 +15,7 @@ A research platform for Indian equities (NSE/BSE) with global indices, forex and
 | WhatsApp reports and delivery webhooks | Built; **pending Meta credentials, approved templates and recipient opt-in** |
 | Angel One (stocks, NIFTY 50 / SENSEX, MCX commodities, currency futures) | Built and unit-tested; **pending the `ANGELONE_*` values and live testing** |
 | TradingView charts on Global, Forex, Commodities | Built (display only; not used in scores or reports) |
-| Global index numbers for scoring and the 08:00 report | **Pending a data API** (TradingView has none) |
-| Brent crude | **Pending** (no MCX contract) |
+| Global indices and Brent from CFI Financial (MT5 bridge, Windows) | Built and unit-tested; **pending the CFI MT5 terminal and live testing** |
 | News (RSS) | Built; **pending a list of licensed feeds** |
 | Supabase project | Created (Mumbai); all migrations applied |
 | Deployment to MilesWeb | **Not yet deployed**; guide written |

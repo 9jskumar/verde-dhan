@@ -1,0 +1,2 @@
+# Windows only: MetaQuotes' official package talks to a local MT5 terminal.
+MetaTrader5>=5.0.45

@@ -19,8 +19,7 @@ Status as of 2026-10-24. "Built" means implemented with tests where testable off
 - [x] Demo provider (fictional universe, clearly labelled)
 - [ ] Angel One SmartAPI adapter (stocks, NIFTY 50 / SENSEX, MCX, currency futures) with automatic daily login — **built and unit-tested, pending the four `ANGELONE_*` values and live verification**
 - [x] TradingView widgets on Global, Forex and Commodities pages (display only)
-- [ ] Global index numbers for scoring and the 08:00 report — **pending a data API (TradingView has none)**
-- [ ] Brent — **pending; no MCX contract**
+- [ ] CFI Financial MT5 bridge for global indices and Brent — **built and unit-tested, pending a Windows machine with the CFI MT5 terminal and live verification**
 - [ ] Fundamentals and corporate announcements vendor — **pending vendor choice; interface only**
 - [ ] RSS news — **built, pending licensed feed list**
 

@@ -60,14 +60,18 @@ export function TradingViewQuotes({ title, symbols, height = 420 }: { title: str
   );
 }
 
-/** Internal key → TradingView symbol. Index CFDs track the cash index but are not the official index level. */
+/**
+ * CFI Financial's CFD symbols on TradingView (each checked to load in a
+ * widget). They match the CFI MT5 prices the bridge stores, but track the
+ * cash index rather than being the official index level.
+ */
 export const TV_INDICES: TvSymbol[] = [
-  { name: "FOREXCOM:SPXUSD", displayName: "S&P 500" },
-  { name: "FOREXCOM:NSXUSD", displayName: "Nasdaq-100" },
-  { name: "FOREXCOM:DJI", displayName: "Dow Jones" },
-  { name: "FOREXCOM:UKXGBP", displayName: "FTSE 100" },
-  { name: "FOREXCOM:GRXEUR", displayName: "DAX" },
-  { name: "FOREXCOM:JPXJPY", displayName: "Nikkei 225" },
+  { name: "CFI:US500", displayName: "S&P 500" },
+  { name: "CFI:US100", displayName: "Nasdaq-100" },
+  { name: "CFI:US30", displayName: "Dow Jones" },
+  { name: "CFI:UK100", displayName: "FTSE 100" },
+  { name: "CFI:GER30", displayName: "DAX 40" },
+  { name: "CFI:JPN225", displayName: "Nikkei 225" },
 ];
 
 export const TV_FOREX: TvSymbol[] = [
@@ -81,7 +85,7 @@ export const TV_FOREX: TvSymbol[] = [
 ];
 
 export const TV_COMMODITIES: TvSymbol[] = [
-  { name: "TVC:UKOIL", displayName: "Brent crude" },
+  { name: "CFI:BRENT", displayName: "Brent crude" },
   { name: "TVC:USOIL", displayName: "WTI crude" },
   { name: "TVC:GOLD", displayName: "Gold" },
   { name: "TVC:SILVER", displayName: "Silver" },

@@ -30,7 +30,11 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe to 
 | `ANGELONE_PIN` | Angel One | Login PIN (MPIN). Secret. |
 | `ANGELONE_TOTP_SECRET` | Angel One | TOTP setup key from smartapi.angelone.in/enable-totp. Secret: anyone with it and the PIN can log in. |
 | `GLOBAL_MARKET_PROVIDER` | Global, Forex, Commodities pages | `tradingview` (default; browser widgets, display only) or `none` |
-| `GLOBAL_DATA_PROVIDER` | global index numbers | `twelvedata` or `none` (default). Not in use. |
+| `GLOBAL_DATA_PROVIDER` | global index and Brent numbers | `cfi_mt5` (the CFI bridge writes them), `twelvedata` (dormant) or `none` (default) |
+| `CFI_SYMBOL_MAP` | CFI bridge only | JSON from internal key to CFI MT5 symbol, e.g. `{"SPX":"US500","BRENT":"BRENT"}`. Keys not listed are not fetched. |
+| `CFI_MT5_LOGIN`, `CFI_MT5_PASSWORD`, `CFI_MT5_SERVER` | CFI bridge only | Optional if the terminal is already logged in. Use the investor (read-only) password. Secret. |
+| `CFI_MT5_TERMINAL_PATH` | CFI bridge only | Optional path to `terminal64.exe` |
+| `CFI_SERVER_UTC_OFFSET` | CFI bridge only | Optional, hours. Inferred from the latest tick when unset. |
 | `TWELVEDATA_API_KEY`, `TWELVEDATA_SYMBOL_MAP` | | Only with `GLOBAL_DATA_PROVIDER=twelvedata` |
 | `NEWS_RSS_FEEDS` | news | Comma-separated RSS URLs you are licensed to use |
 | `CRON_SECRET` | `/api/cron/*` | Long random string; sent as `Authorization: Bearer …` |

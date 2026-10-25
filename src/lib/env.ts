@@ -50,8 +50,12 @@ const schema = z.object({
    * feed the scores, AI evidence or WhatsApp reports.
    */
   GLOBAL_MARKET_PROVIDER: z.enum(["tradingview", "none"]).default("tradingview"),
-  /** Server-side source of global numbers for scoring and reports. */
-  GLOBAL_DATA_PROVIDER: z.enum(["twelvedata", "none"]).default("none"),
+  /**
+   * Server-side source of global index and Brent numbers for scoring and
+   * reports. "cfi_mt5" means the CFI Financial MT5 bridge
+   * (bridge/cfi_mt5) writes them straight to the database.
+   */
+  GLOBAL_DATA_PROVIDER: z.enum(["cfi_mt5", "twelvedata", "none"]).default("none"),
   TWELVEDATA_API_KEY: optional,
   /** JSON object overriding internal key → vendor symbol, e.g. {"SPX":"SPX"} */
   TWELVEDATA_SYMBOL_MAP: optional,
@@ -102,7 +106,7 @@ export const integrationStatus = (e: Env = env()) => ({
   whatsappWebhook: Boolean(e.WHATSAPP_APP_SECRET && e.WHATSAPP_WEBHOOK_VERIFY_TOKEN),
   indiaMarketData: angelOneConfigured(e),
   globalCharts: e.GLOBAL_MARKET_PROVIDER === "tradingview",
-  globalMarketData: e.GLOBAL_DATA_PROVIDER === "twelvedata" && Boolean(e.TWELVEDATA_API_KEY),
+  globalMarketData: e.GLOBAL_DATA_PROVIDER === "cfi_mt5" || (e.GLOBAL_DATA_PROVIDER === "twelvedata" && Boolean(e.TWELVEDATA_API_KEY)),
   news: Boolean(e.NEWS_RSS_FEEDS),
   cron: Boolean(e.CRON_SECRET),
   demoMode: isDemoMode(e),

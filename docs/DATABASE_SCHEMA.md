@@ -60,6 +60,8 @@ Views use `security_invoker = true`, so they respect the caller's RLS. Materiali
 
 **0800 data sources** registers `angelone` (enabled) and `twelvedata` (disabled) in `data_sources`. Price tables reference `data_sources(id)`, so a provider's rows are refused until it is listed.
 
+**0900 CFI source** registers `cfi` (CFI Financial MT5) for global index and Brent readings written by the bridge.
+
 ## Applying
 
 ```bash

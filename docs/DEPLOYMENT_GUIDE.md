@@ -53,6 +53,17 @@ The full list and cron expressions are in `src/lib/jobs/definitions.ts` and on t
 
 Limitations on shared hosting: per-process memory and CPU caps can kill long jobs, and minute-level cron may not be allowed (then dispatch runs less often and messages go out late).
 
+## CFI Financial bridge (global indices and Brent)
+
+CFI publishes prices through MetaTrader 5, and MT5 can only be read by a program on the same Windows machine as the CFI MT5 terminal. So this part does not run on MilesWeb Linux hosting. Run it on a Windows PC or a Windows VPS that stays on:
+
+1. Install the CFI MT5 terminal and log in. Use the **investor (read-only) password**: it can read prices but cannot trade.
+2. Install Python 3.10+ and `pip install -r bridge/cfi_mt5/requirements.txt`.
+3. Run `python bridge/cfi_mt5/cfi_mt5_bridge.py --env-file .env.local --list-symbols` and set `CFI_SYMBOL_MAP`. The CFI names that load on TradingView are `{"SPX":"US500","NDX":"US100","DJI":"US30","FTSE":"UK100","DAX":"GER30","N225":"JPN225","BRENT":"BRENT"}`. Confirm them against the list, since MT5 names can carry a suffix.
+4. Check with `--dry-run`, then run it for real.
+5. Schedule it in Windows Task Scheduler every 15 minutes, or run it with `--loop 900`. The 08:00 IST global report uses whatever was stored last, so the bridge must have run shortly before 07:55 IST.
+6. Set `GLOBAL_DATA_PROVIDER=cfi_mt5` on the web server and worker.
+
 ## Supabase
 
 1. Create a project (Mumbai region `ap-south-1` keeps latency low for Indian users).

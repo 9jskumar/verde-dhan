@@ -29,6 +29,7 @@ RLS isolation between two users for every owner table; anon has no access; authe
 | Area | Test to run once available |
 |---|---|
 | Angel One | Log in; fetch NIFTY 50, SENSEX and two stocks' daily candles and compare a week of closes with the Angel One app; check the MCX gold/crude and USDINR front-month contracts match the app |
+| CFI bridge | `--dry-run` on the Windows machine; compare each value with the CFI MT5 terminal; run for real and check `v_global_market_latest` and `v_commodities_latest` |
 | TradingView | Open Global, Forex and Commodities; confirm every widget symbol loads (no "invalid symbol") in light and dark themes |
 | Supabase live | Apply migrations to the real project; sign in; create watchlist and portfolio; check RLS with two accounts |
 | Jobs | Run each job once with `npm run job -- <name>`; check `job_runs`; re-run to confirm idempotency |
