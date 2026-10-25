@@ -13,9 +13,9 @@ export const stockRecommendationSchema = z.object({
   companyName: z.string(),
   fundamentalScore: z.number(),
   technicalScore: z.number(),
-  catalystScore: z.number(),
+  catalystScore: z.number().describe("Copy score.catalyst from the evidence pack."),
   valuationRiskScore: z.number(),
-  globalAlignmentScore: z.number(),
+  globalAlignmentScore: z.number().describe("Copy score.global from the evidence pack."),
   totalScore: z.number(),
   recommendation: z.enum(RECOMMENDATIONS),
   entryLow: z.number().nullable(),
@@ -29,7 +29,8 @@ export const stockRecommendationSchema = z.object({
   summary: z.string(),
   supportingEvidence: z.array(z.object({ claim: z.string(), evidenceIds: z.array(z.string()) })),
   riskFactors: z.array(z.string()),
-  sourceReferences: z.array(z.string()),
+  /** Evidence ids from the pack (not source names). */
+  sourceReferences: z.array(z.string()).describe("Evidence ids from the evidence pack, e.g. score.total. Never source names or dates."),
   /** How well the evidence supports the view. Not a probability of profit. */
   evidenceConfidence: z.enum(["LOW", "MEDIUM", "HIGH"]),
   dataGaps: z.array(z.string()),

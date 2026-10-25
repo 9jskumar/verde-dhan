@@ -33,6 +33,9 @@ export function stockEvidence(a: StockAnalysis, extra: EvidenceItem[] = []): Evi
   push("score.fundamental", "Fundamental quality (/40)", a.score.fundamental, "scoring-engine");
   push("score.technical", "Technical strength (/35)", a.score.technical, "scoring-engine");
   push("score.catalyst_global", "Catalysts & global alignment (/15)", a.score.catalystGlobal, "scoring-engine");
+  const part = (prefix: string) => a.score.components.filter((c) => c.name.startsWith(prefix)).reduce((t, c) => t + c.points, 0);
+  push("score.catalyst", "Catalyst score (/9), part of catalysts & global", Math.round(part("Catalyst") * 100) / 100, "scoring-engine");
+  push("score.global", "Global alignment score (/6), part of catalysts & global", Math.round(part("Global") * 100) / 100, "scoring-engine");
   push("score.valuation_risk", "Valuation & risk (/10)", a.score.valuationRisk, "scoring-engine");
   push("score.classification", "Classification", a.score.classification, "scoring-engine");
   push("score.rejections", "Mandatory rejection flags", a.score.rejections.join(", ") || "none", "scoring-engine");
@@ -70,6 +73,7 @@ export function stockEvidence(a: StockAnalysis, extra: EvidenceItem[] = []): Evi
   }
   const p = a.breakout.plan;
   if (p) {
+    push("plan.method", "How levels are derived", "entry zone = breakout level to +2%; stop = max(level − 1.5 × ATR(14), base low); targets = entry midpoint + 1.5R, 2.5R, and max(3.5R, measured move)", a.breakout.version);
     push("plan.breakout_level", "Breakout level", p.breakoutLevel, a.breakout.version);
     push("plan.entry_low", "Entry zone low", p.entryLow, a.breakout.version);
     push("plan.entry_high", "Entry zone high", p.entryHigh, a.breakout.version);

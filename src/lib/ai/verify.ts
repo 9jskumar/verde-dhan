@@ -46,6 +46,17 @@ export function extractNumbers(text: string): number[] {
 /** Small integers are allowed in prose ("3 catalysts", "50-day", "14-period"). */
 const ALLOWED_FREE_NUMBERS = new Set([0, 1, 2, 3, 4, 5, 9, 10, 12, 14, 15, 20, 26, 35, 40, 50, 63, 100, 200]);
 
+/**
+ * Numbers the model may quote: every evidence value, plus documented method
+ * constants that appear in evidence labels (e.g. the 1.5× volume threshold).
+ */
+function knownNumbers(evidence: EvidencePack): number[] {
+  return evidence.items.flatMap((i) => [
+    ...(typeof i.value === "number" ? [i.value] : typeof i.value === "string" ? extractNumbers(i.value) : []),
+    ...extractNumbers(i.label),
+  ]);
+}
+
 export function verifyStockRecommendation(ai: StockRecommendation, analysis: StockAnalysis, evidence: EvidencePack, opts: { now?: number; maxAgeHours?: number } = {}): VerificationResult {
   const issues: string[] = [];
   if (ai.symbol !== analysis.symbol) issues.push(`symbol mismatch: ${ai.symbol} ≠ ${analysis.symbol}`);
@@ -95,7 +106,7 @@ export function verifyStockRecommendation(ai: StockRecommendation, analysis: Sto
   for (const id of cited) if (!ids.has(id)) issues.push(`cites unknown evidence id "${id}"`);
   if (ai.supportingEvidence.some((e) => e.evidenceIds.length === 0)) issues.push("a supporting claim has no evidence reference");
 
-  const known = evidence.items.flatMap((i) => (typeof i.value === "number" ? [i.value] : typeof i.value === "string" ? extractNumbers(i.value) : []));
+  const known = knownNumbers(evidence);
   const prose = [ai.summary, ...ai.supportingEvidence.map((e) => e.claim), ...ai.riskFactors].join("\n");
   for (const n of extractNumbers(prose)) {
     if (ALLOWED_FREE_NUMBERS.has(Math.abs(n))) continue;
@@ -119,7 +130,7 @@ export function verifyAssistantAnswer(answer: { answer: string; evidenceIds: str
   const issues: string[] = [];
   const ids = new Set(evidence.items.map((i) => i.id));
   for (const id of answer.evidenceIds) if (!ids.has(id)) issues.push(`cites unknown evidence id "${id}"`);
-  const known = evidence.items.flatMap((i) => (typeof i.value === "number" ? [i.value] : typeof i.value === "string" ? extractNumbers(i.value) : []));
+  const known = knownNumbers(evidence);
   for (const n of extractNumbers(answer.answer)) {
     if (ALLOWED_FREE_NUMBERS.has(Math.abs(n))) continue;
     if (!known.some((k) => close(n, k, 0.01, 0.051) || close(n, k * 100, 0.01, 0.051))) issues.push(`number ${n} in text is not in the evidence`);

@@ -1,6 +1,6 @@
 # Database schema
 
-Postgres on Supabase. Six migrations in `supabase/migrations/`, applied in order. Every table has RLS enabled. Tested by `npm run test:db` (see TESTING_PLAN.md).
+Postgres on Supabase. Seven migrations in `supabase/migrations/`, applied in order. Every table has RLS enabled. Tested by `npm run test:db` (see TESTING_PLAN.md).
 
 ## Access model
 
@@ -55,6 +55,8 @@ Views use `security_invoker = true`, so they respect the caller's RLS. Materiali
 | `v_recommendation_performance` | Outcomes by list, regime and sector |
 
 `refresh_market_views()` (security definer, executable by `service_role` only) refreshes the materialized views concurrently.
+
+**0700 hardening** fixes the Supabase security advisor findings: fixed `search_path` on trigger functions, and no API execute rights for anonymous users on the security-definer helpers. Remaining advisor notes are intentional: price partitions have RLS with no policies (access goes through the parent table), and the two materialized views are readable by signed-in users only.
 
 ## Applying
 
