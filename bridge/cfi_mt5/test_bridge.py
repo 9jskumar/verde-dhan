@@ -48,6 +48,11 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(fx[0]["pair"], "USDJPY")
         self.assertEqual((fx[0]["bid"], fx[0]["ask"], fx[0]["mid"]), (152.29, 152.31, 152.3))
 
+    def test_stale_daily_bars_are_not_used_for_previous_close(self):
+        day = 1_793_000_000 // 86400 * 86400
+        self.assertTrue(b.bars_are_current(day, day + 3600))
+        self.assertFalse(b.bars_are_current(day - 86400, day + 3600))
+
     def test_symbol_map_rejects_unknown_keys_and_requires_config(self):
         os.environ.pop("CFI_SYMBOL_MAP", None)
         with self.assertRaises(SystemExit):

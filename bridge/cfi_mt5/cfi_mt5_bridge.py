@@ -143,6 +143,11 @@ def to_utc(server_epoch: int, offset_h: float) -> datetime:
     return datetime.fromtimestamp(server_epoch - offset_h * 3600, tz=timezone.utc)
 
 
+def bars_are_current(today_bar_epoch: int, tick_epoch: int) -> bool:
+    """True when the newest daily bar is the tick's own server day (both in server time)."""
+    return today_bar_epoch // 86400 == tick_epoch // 86400
+
+
 def market_status(ts: datetime, now: datetime) -> str:
     return "OPEN" if now - ts <= STALE_AFTER else "CLOSED"
 
@@ -228,14 +233,18 @@ def to_readings(raw, offset_h: float) -> list[Reading]:
     for key, sym, tick, rates in raw:
         last = float(tick.last) if getattr(tick, "last", 0) else (float(tick.bid) + float(tick.ask)) / 2
         prev_bar, today_bar = rates[0], rates[1]
+        # Right after startup the terminal can still be loading daily bars, so
+        # the newest bar may not be today's yet. Then "previous close" would be
+        # an older day's close and the % change wrong, so leave it unknown.
+        current = bars_are_current(int(today_bar["time"]), int(tick.time))
         out.append(Reading(
             key=key, cfi_symbol=sym,
             timestamp=to_utc(int(tick.time), offset_h),
             last=last,
             # Previous close of CFI's trading day (server time), not the exchange's official close.
-            previous_close=float(prev_bar["close"]) or None,
-            day_high=float(today_bar["high"]) or None,
-            day_low=float(today_bar["low"]) or None,
+            previous_close=(float(prev_bar["close"]) or None) if current else None,
+            day_high=(float(today_bar["high"]) or None) if current else None,
+            day_low=(float(today_bar["low"]) or None) if current else None,
             bid=float(tick.bid) or None,
             ask=float(tick.ask) or None,
         ))
